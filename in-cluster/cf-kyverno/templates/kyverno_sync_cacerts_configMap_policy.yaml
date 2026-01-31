@@ -1,0 +1,22 @@
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: sync-cacerts-configmap
+spec:
+  validationFailureAction: Enforce
+  rules:
+  - name: sync-cacerts-configmap
+    match:
+      any:
+      - resources:
+          kinds:
+          - Namespace
+    generate:
+      apiVersion: v1
+      kind: ConfigMap
+      name: ca-certs
+      namespace: "{{request.object.metadata.name}}"
+      synchronize: true
+      clone:
+        namespace: default
+        name: ca-certs

@@ -1,0 +1,15 @@
+# Default values for cf-kyverno.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+cf-kyverno:
+  enabled: true
+kyverno:
+  admissionController:
+    replicas: 1
+  backgroundController:
+    replicas: 1
+  cleanupController:
+    replicas: 1
+  reportController:
+    replicas: 1
