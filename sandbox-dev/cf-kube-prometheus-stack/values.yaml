@@ -1,0 +1,68 @@
+# Default values for cf-prometheus-kube-stack.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+cf-kube-prometheus-stack:
+  enabled: true
+
+kube-prometheus-stack:
+  grafana:
+    image:
+      tag: "12.3.0"
+    grafana.ini:
+      smtp:
+        enabled: true
+        host: smtp.example.com:25
+    adminUser: project-admin
+    adminPassword: project-2025
+    sidecar:
+      datasources:
+        enabled: false
+        defaultDatasourceEnabled: true
+        isDefaultDatasource: true
+        name: Prometheus
+        uid: prometheus
+    persistence:
+      # persistence for Grafana data /var/lib/grafana
+      enabled: false
+      existingClaim: ebs-claim
+    ingress:
+      enabled: false
+      hosts:
+        - grafana.lowsandbox.com
+      ingressClassName: nginx
+      pathType: Prefix
+      path: /
+      tls:
+        - secretName: "lowsandbox-tls"
+    datasources:
+      # trying this out -- manage this way to avoid complexity of sidecar reloads
+      datasources.yaml:
+        apiVersion: 1
+        datasources:
+          - name: "Prometheus"
+            type: prometheus
+            uid: prometheus
+            url: http://kube-prometheus-stack-prometheus.monitoring:9090/
+            access: proxy
+            isDefault: true
+            jsonData:
+              httpMethod: POST
+              timeInterval: 30s
+          - name: "Alertmanager"
+            type: alertmanager
+            uid: alertmanager
+            url: http://kube-prometheus-stack-alertmanager.monitoring:9093/
+            access: proxy
+            jsonData:
+              handleGrafanaManagedAlerts: false
+              implementation: prometheus
+          # adding this to prevent users from having to adding Loki datasource everyday
+          - name: "Loki"
+            type: loki
+            uid: loki
+            url: http://loki-gateway.monitoring/
+            access: proxy
+            jsonData:
+              timeout: 60
+              maxLines: 1000

@@ -1,0 +1,24 @@
+cf-ingress-haproxy:
+  enabled: true
+kubernetes-ingress:
+  controller:
+    image:
+      repository: haproxytech/kubernetes-ingress
+      tag: ""
+    kind: Deployment # consider using DaemonSet for better performance
+    ingressClassName: haproxy
+    logging:
+      traffic:
+        address: "stdout"
+        format: "raw"
+        facility: "daemon"
+    service:
+      type: LoadBalancer
+      enablePorts: # disable ports that are not needed and may not be supported in TS
+        quic: false
+        admin: false
+        stat: false
+      annotations:
+        service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
+        service.beta.kubernetes.io/aws-load-balancer-scheme: "internet-facing"
+        service.beta.kubernetes.io/aws-load-balancer-cross-zone-load-balancing-enabled: "true"
