@@ -3,7 +3,7 @@
 # Declare variables to be passed into your templates.
 
 cf-kube-prometheus-stack:
-  enabled: false
+  enabled: true
 
 kube-prometheus-stack:
   grafana:
