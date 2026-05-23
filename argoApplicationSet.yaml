@@ -1,0 +1,39 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: c1-core-cluster-services
+spec:
+  goTemplate: true
+  goTemplateOptions: ["missingkey=error"]
+  generators:
+    - matrix:
+        generators:
+          - list:
+              elements:
+              - cluster: in-cluster
+                url: https://kubernetes.default.svc
+#          - git:
+#              repoURL: https://github.com/lwooden/containerfirst.git
+#              revision: HEAD
+#              directories:
+#               - path: '{{.cluster}}/*'
+          - git:
+              repoURL: https://github.com/lwooden/containerfirst.git
+              revision: HEAD
+              files:
+                - path: '{{.cluster}}/**/config.json' # app folder contains file that has {"namespace": "monitoring"}
+  template:
+    metadata:
+      name: '{{.path.basename}}'
+    spec:
+      project: default
+      source:
+        repoURL: https://github.com/lwooden/containerfirst.git
+        targetRevision: HEAD
+        path: '{{.path.path}}'
+      destination:
+        server: '{{.url}}'
+        namespace: '{{.namespace}}' # extracted from config.json
+      syncPolicy:
+        syncOptions:
+        - CreateNamespace=true
